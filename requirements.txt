@@ -25,6 +25,16 @@ playwright>=1.40
 
 # Document Processing
 python-docx>=0.8
+pypdf>=3.0
+pymupdf>=1.23
+
+# Multi-modal Processing
+opencv-python>=4.8
+mss>=9.0
+edge-tts>=6.1
+
+# Optional: Whisper for ASR (requires ffmpeg)
+# openai-whisper>=20231117
 
 # Data Processing
 pandas>=2.0
