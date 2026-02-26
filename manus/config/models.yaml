@@ -1,0 +1,226 @@
+# Manus Model Configuration
+# This file defines available LLM providers and their models
+
+models:
+  # OpenAI
+  - provider: openai
+    name: OpenAI
+    api_key_env: OPENAI_API_KEY
+    base_url: https://api.openai.com/v1
+    models:
+      - id: gpt-4o
+        name: GPT-4O
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 128000
+        supports_json: true
+      - id: gpt-4o-mini
+        name: GPT-4O Mini
+        capabilities:
+          - chat
+        max_tokens: 128000
+        supports_json: true
+      - id: gpt-4-turbo
+        name: GPT-4 Turbo
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 128000
+        supports_json: true
+
+  # Anthropic (Claude)
+  - provider: anthropic
+    name: Anthropic
+    api_key_env: ANTHROPIC_API_KEY
+    base_url: https://api.anthropic.com/v1
+    models:
+      - id: claude-sonnet-4-20250514
+        name: Claude Sonnet 4
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 200000
+        supports_json: true
+      - id: claude-3-5-sonnet-20241022
+        name: Claude 3.5 Sonnet
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 200000
+        supports_json: true
+      - id: claude-3-haiku-20240307
+        name: Claude 3 Haiku
+        capabilities:
+          - chat
+        max_tokens: 200000
+        supports_json: true
+
+  # DeepSeek
+  - provider: deepseek
+    name: DeepSeek
+    api_key_env: DEEPSEEK_API_KEY
+    base_url: https://api.deepseek.com/v1
+    models:
+      - id: deepseek-chat
+        name: DeepSeek Chat
+        capabilities:
+          - chat
+        max_tokens: 32000
+        supports_json: true
+
+  # Alibaba (Qwen)
+  - provider: qwen
+    name: Qwen
+    api_key_env: QWEN_API_KEY
+    base_url: https://dashscope.aliyuncs.com/compatible-mode/v1
+    models:
+      - id: qwen-turbo
+        name: Qwen Turbo
+        capabilities:
+          - chat
+        max_tokens: 10000
+        supports_json: true
+      - id: qwen-plus
+        name: Qwen Plus
+        capabilities:
+          - chat
+        max_tokens: 30000
+        supports_json: true
+      - id: qwen-max
+        name: Qwen Max
+        capabilities:
+          - chat
+        max_tokens: 30000
+        supports_json: true
+
+  # Moonshot (Kimi)
+  - provider: kimi
+    name: Moonshot (Kimi)
+    api_key_env: KIMI_API_KEY
+    base_url: https://api.moonshot.cn/v1
+    models:
+      - id: moonshot-v1-8k
+        name: Kimi V1 8K
+        capabilities:
+          - chat
+        max_tokens: 8000
+        supports_json: true
+      - id: moonshot-v1-32k
+        name: Kimi V1 32K
+        capabilities:
+          - chat
+        max_tokens: 32000
+        supports_json: true
+
+  # MiniMax
+  - provider: minimax
+    name: MiniMax
+    api_key_env: MINIMAX_API_KEY
+    base_url: https://api.minimax.chat/v1
+    models:
+      - id: MiniMax-Text-01
+        name: MiniMax Text 01
+        capabilities:
+          - chat
+        max_tokens: 30000
+        supports_json: true
+
+  # Zhipu (GLM)
+  - provider: glm
+    name: Zhipu (GLM)
+    api_key_env: GLM_API_KEY
+    base_url: https://open.bigmodel.cn/api/paas/v4
+    models:
+      - id: glm-4
+        name: GLM-4
+        capabilities:
+          - chat
+        max_tokens: 32000
+        supports_json: true
+      - id: glm-4-flash
+        name: GLM-4 Flash
+        capabilities:
+          - chat
+        max_tokens: 32000
+        supports_json: true
+
+  # ByteDance (Doubao)
+  - provider: doubao
+    name: ByteDance (Doubao)
+    api_key_env: DOUBAO_API_KEY
+    base_url: https://ark.cn-beijing.volces.com/api/v3
+    models:
+      - id: doubao-pro-32k
+        name: Doubao Pro 32K
+        capabilities:
+          - chat
+        max_tokens: 32000
+        supports_json: true
+      - id: doubao-lite-32k
+        name: Doubao Lite 32K
+        capabilities:
+          - chat
+        max_tokens: 32000
+        supports_json: true
+
+  # Tencent (HunYuan)
+  - provider: hunyuan
+    name: Tencent (HunYuan)
+    api_key_env: HUNYUAN_API_KEY
+    base_url: https://hunyuan.tencentcloudapi.com
+    models:
+      - id: hunyuan-lite
+        name: HunYuan Lite
+        capabilities:
+          - chat
+        max_tokens: 8000
+        supports_json: true
+      - id: hunyuan-pro
+        name: HunYuan Pro
+        capabilities:
+          - chat
+        max_tokens: 8000
+        supports_json: true
+
+  # Google (Gemini)
+  - provider: google
+    name: Google (Gemini)
+    api_key_env: GOOGLE_API_KEY
+    base_url: https://generativelanguage.googleapis.com/v1beta
+    models:
+      - id: gemini-2.0-flash-exp
+        name: Gemini 2.0 Flash
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 1000000
+        supports_json: true
+      - id: gemini-1.5-pro
+        name: Gemini 1.5 Pro
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 2000000
+        supports_json: true
+      - id: gemini-1.5-flash
+        name: Gemini 1.5 Flash
+        capabilities:
+          - chat
+          - vision
+        max_tokens: 1000000
+        supports_json: true
+
+# Default settings
+defaults:
+  # Default model ID
+  default_model: gpt-4o
+
+  # Model selection for different agents
+  planner_model: gpt-4o
+  executor_model: gpt-4o-mini
+  verifier_model: claude-3-5-sonnet-20241022
+
+  # Temperature settings
+  temperature: 0.7
+  max_tokens: 4096

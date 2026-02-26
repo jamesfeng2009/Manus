@@ -1,0 +1,37 @@
+# Manus - A general-purpose AI Agent system
+
+# Core
+agno>=2.0
+
+# Web Framework
+litestar>=2.0
+
+# Data Validation
+pydantic>=2.0
+
+# Configuration
+pyyaml>=6.0
+python-dotenv>=1.0
+
+# LLM Clients
+openai>=1.0
+anthropic>=0.18
+
+# HTTP
+httpx>=0.24
+
+# Browser Automation
+playwright>=1.40
+
+# Document Processing
+python-docx>=0.8
+
+# Data Processing
+pandas>=2.0
+matplotlib>=3.7
+
+# Async
+aiofiles>=23.0
+
+# Optional: Production server
+# uvicorn[standard]>=0.20
