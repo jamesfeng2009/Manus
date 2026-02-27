@@ -71,18 +71,3 @@ class TokenCounter:
                             total += 85
         total += len(messages) * 4
         return total
-
-    @classmethod
-    def estimate_cost(
-        cls,
-        text: str,
-        model: str,
-        prompt_or_completion: str = "prompt",
-    ) -> float:
-        from manus.metrics.cost import CostCalculator
-
-        tokens = cls.count(text, model)
-        if prompt_or_completion == "prompt":
-            return CostCalculator.calculate_cost("", model, tokens, 0)
-        else:
-            return CostCalculator.calculate_cost("", model, 0, tokens)

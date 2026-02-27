@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from manus.config import get_config
+from manus.config.loader import get_config_loader
 from manus.core.exceptions import ModelError
 from manus.core.types import ModelInfo, ProviderInfo
 from manus.models.adapters.anthropic import AnthropicAdapter
@@ -41,14 +41,14 @@ class ModelFactory:
 
     def __init__(self):
         self._adapters: dict[str, ModelAdapter] = {}
-        self._config = get_config()
+        self._config_loader = get_config_loader()
 
     def get_adapter(self, model_id: str) -> ModelAdapter:
         """Get or create adapter for a model."""
         if model_id in self._adapters:
             return self._adapters[model_id]
 
-        result = self._config.get_model(model_id)
+        result = self._config_loader.get_model(model_id)
         if not result:
             raise ModelError(f"Model not found: {model_id}")
 
@@ -70,7 +70,7 @@ class ModelFactory:
         base_url: str | None = None,
     ) -> ModelAdapter:
         """Create a new adapter with custom configuration."""
-        provider_info = self._config.get_provider(provider)
+        provider_info = self._config_loader.get_provider(provider)
         if not provider_info:
             raise ModelError(f"Provider not found: {provider}")
 
@@ -97,7 +97,7 @@ class ModelFactory:
     def list_available_models(self) -> list[str]:
         """List all available model IDs."""
         models = []
-        for provider in self._config.models:
+        for provider in self._config_loader.get_config().models:
             for model in provider.models:
                 models.append(model.id)
         return models

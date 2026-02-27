@@ -109,3 +109,16 @@ class CostCalculator:
     def reload_pricing(cls):
         cls._pricing_cache = None
         cls._unknown_models.clear()
+
+
+def estimate_cost_from_text(text: str, model: str, is_completion: bool = False) -> float:
+    """估算文本的成本（需要先安装 tiktoken）"""
+    try:
+        from manus.metrics.tokenizer import TokenCounter
+    except ImportError:
+        return 0.0
+    
+    tokens = TokenCounter.count(text, model)
+    if is_completion:
+        return CostCalculator.calculate_cost("", model, 0, tokens)
+    return CostCalculator.calculate_cost("", model, tokens, 0)
