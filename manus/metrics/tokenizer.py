@@ -1,25 +1,20 @@
 """Token counter using tiktoken for estimation."""
 
-from typing import TypedDict
-
-
 ENCODING_MAP = {
     "gpt-4o": "o200k_base",
     "gpt-4o-mini": "o200k_base",
     "gpt-4-turbo": "o200k_base",
-    "gpt-4": "cl100k_base",
-    "gpt-3.5-turbo": "cl100k_base",
-    "claude-3-5-sonnet": "cl100k_base",
-    "claude-3-opus": "cl100k_base",
-    "claude-3-haiku": "cl100k_base",
-    "deepseek-chat": "cl100k_base",
-    "deepseek-coder": "cl100k_base",
-    "qwen-turbo": "cl100k_base",
-    "qwen-plus": "cl100k_base",
-    "qwen-max": "cl100k_base",
-    "gemini-1.5-pro": "cl100k_base",
-    "gemini-1.5-flash": "cl100k_base",
-    "default": "cl100k_base",
+    "claude-sonnet": "cl100k_base",
+    "claude-opus": "cl100k_base",
+    "claude-haiku": "cl100k_base",
+    "deepseek": "cl100k_base",
+    "qwen": "cl100k_base",
+    "gemini": "cl100k_base",
+    "glm": "cl100k_base",
+    "doubao": "cl100k_base",
+    "hunyuan": "cl100k_base",
+    "kimi": "cl100k_base",
+    "moonshot": "cl100k_base",
 }
 
 
