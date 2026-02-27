@@ -67,6 +67,39 @@ Action: [tool_name] [parameters]
         self.memory = get_memory_manager()
         self.context = get_cross_task_context()
 
+        self.on_token: callable | None = None
+        self.on_thinking: callable | None = None
+        self.on_tool_call: callable | None = None
+        self.on_tool_result: callable | None = None
+
+    def _emit_token(self, token: str):
+        if self.on_token:
+            try:
+                self.on_token(token)
+            except Exception:
+                pass
+
+    def _emit_thinking(self, reasoning: str):
+        if self.on_thinking:
+            try:
+                self.on_thinking(reasoning)
+            except Exception:
+                pass
+
+    def _emit_tool_call(self, tool_name: str, args: dict):
+        if self.on_tool_call:
+            try:
+                self.on_tool_call(tool_name, args)
+            except Exception:
+                pass
+
+    def _emit_tool_result(self, tool_name: str, result: str):
+        if self.on_tool_result:
+            try:
+                self.on_tool_result(tool_name, result)
+            except Exception:
+                pass
+
     async def execute(
         self,
         task_id: str,
@@ -101,6 +134,7 @@ Action: [tool_name] [parameters]
                     temperature=0.7,
                     max_tokens=2048,
                 )
+                self._emit_thinking(content)
             except Exception as e:
                 result["status"] = TaskStatus.FAILED.value
                 result["error"] = str(e)
@@ -136,8 +170,10 @@ Action: [tool_name] [parameters]
                     if not tool:
                         observation = f"Error: Tool '{tool_name}' not found"
                     else:
+                        self._emit_tool_call(tool_name, tool_args)
                         tool_result = await tool.execute_with_timing(**tool_args)
                         observation = tool_result.content or tool_result.error or "No output"
+                        self._emit_tool_result(tool_name, observation[:500])
 
                         if tool_result.status.value == "success":
                             self.context.add_tool_usage(
@@ -204,6 +240,7 @@ Action: [tool_name] [parameters]
 
         async for chunk in self.adapter.chat_stream(messages=messages):
             accumulated_content += chunk
+            self._emit_token(chunk)
             yield {"type": "chunk", "content": chunk}
 
         yield {"type": "complete", "content": accumulated_content}

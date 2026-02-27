@@ -6,6 +6,7 @@ from manus.tools.code_execution import CodeExecutionTool
 from manus.tools.file_manager import ReadFileTool, WriteFileTool, ListDirectoryTool
 from manus.tools.registry import ToolRegistry, get_tool_registry
 from manus.tools.search import SearchTool
+from manus.tools.image_generation import ImageGenerationTool
 
 __all__ = [
     "Tool",
@@ -19,4 +20,5 @@ __all__ = [
     "ReadFileTool",
     "WriteFileTool",
     "ListDirectoryTool",
+    "ImageGenerationTool",
 ]

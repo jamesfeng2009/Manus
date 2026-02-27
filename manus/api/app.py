@@ -6,11 +6,15 @@ from typing import Any
 from litestar import Litestar, get, post, put, delete
 from litestar.controller import Controller
 from litestar.params import Parameter
+from litestar.exceptions import HTTPException
 from pydantic import BaseModel
 
 from manus.agents import SimpleAgentTeam
 from manus.config import get_config
 from manus.tasks import TaskManager, TaskStatus, get_task_manager
+from manus.websocket.handler import SSEController, WebSocketController, DiscordWebSocketController
+from manus.auth.routes import AuthController, APIKeyController
+from manus.auth.oauth import OAuthController
 
 
 class TaskCreate(BaseModel):
@@ -156,6 +160,37 @@ class TaskController(Controller):
         success = task_manager.delete_task(task_id)
         return {"success": str(success)}
 
+    @post("/{task_id:str}/cancel", status_code=200)
+    async def cancel_task(
+        self,
+        task_id: str,
+        task_manager: TaskManager = get_task_manager,
+    ) -> dict[str, str]:
+        """Cancel a running task."""
+        success = task_manager.cancel_task(task_id)
+        return {"success": str(success)}
+
+    @post("/{task_id:str}/dependencies")
+    async def add_dependency(
+        self,
+        task_id: str,
+        depends_on: str = Parameter(default=None),
+        task_manager: TaskManager = get_task_manager,
+    ) -> dict[str, str]:
+        """Add task dependency."""
+        success = task_manager.add_dependency(task_id, depends_on)
+        return {"success": str(success)}
+
+    @get("/{task_id:str}/dependencies")
+    async def get_dependencies(
+        self,
+        task_id: str,
+        task_manager: TaskManager = get_task_manager,
+    ) -> dict[str, list[str]]:
+        """Get task dependencies."""
+        deps = task_manager.get_dependencies(task_id)
+        return {"dependencies": deps}
+
 
 class ExecuteController(Controller):
     """Task execution endpoints."""
@@ -244,11 +279,53 @@ class HealthController(Controller):
         )
 
 
+class ImageController(Controller):
+    """Image generation endpoints."""
+
+    path = "/images"
+
+    @post("/generate")
+    async def generate_image(
+        self,
+        prompt: str = Parameter(default=None),
+        provider: str = Parameter(default="dalle"),
+        size: str = Parameter(default="1024x1024"),
+        quality: str = Parameter(default="standard"),
+        style: str = Parameter(default="natural"),
+    ) -> dict[str, Any]:
+        """Generate an image."""
+        from manus.models.adapters.image import ImageGenFactory
+
+        try:
+            adapter = ImageGenFactory.create(provider)
+            result = await adapter.generate(
+                prompt=prompt,
+                size=size,
+                quality=quality,
+                style=style,
+            )
+            return {
+                "image_url": result.image_url,
+                "provider": result.provider,
+                "model": result.model,
+                "revised_prompt": result.revised_prompt,
+            }
+        except Exception as e:
+            raise HTTPException(status_code=400, detail=str(e))
+
+
 app = Litestar(
     route_handlers=[
         TaskController,
         ExecuteController,
         ModelController,
         HealthController,
+        ImageController,
+        SSEController,
+        WebSocketController,
+        DiscordWebSocketController,
+        AuthController,
+        APIKeyController,
+        OAuthController,
     ],
 )

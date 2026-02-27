@@ -74,6 +74,39 @@ class AgentTeam:
         )
         self.verifier = VerifierAgent(model_id=verifier_model)
 
+        self.on_token: callable | None = None
+        self.on_thinking: callable | None = None
+        self.on_tool_call: callable | None = None
+        self.on_tool_result: callable | None = None
+
+    def _emit_token(self, token: str):
+        if self.on_token:
+            try:
+                self.on_token(token)
+            except Exception:
+                pass
+
+    def _emit_thinking(self, reasoning: str):
+        if self.on_thinking:
+            try:
+                self.on_thinking(reasoning)
+            except Exception:
+                pass
+
+    def _emit_tool_call(self, tool_name: str, args: dict):
+        if self.on_tool_call:
+            try:
+                self.on_tool_call(tool_name, args)
+            except Exception:
+                pass
+
+    def _emit_tool_result(self, tool_name: str, result: str):
+        if self.on_tool_result:
+            try:
+                self.on_tool_result(tool_name, result)
+            except Exception:
+                pass
+
     async def execute(
         self,
         task_id: str,

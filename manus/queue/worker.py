@@ -6,6 +6,7 @@ from datetime import datetime
 from manus.db import get_database, TaskStatus, TaskType
 from manus.queue.repository import TaskRepository
 from manus.queue.websocket import broadcast_progress, broadcast_status, broadcast_result, broadcast_error
+from manus.queue.manager import get_queue_manager
 
 
 TASK_HANDLERS = {}
@@ -19,13 +20,15 @@ def register_handler(task_type: str):
 
 
 @register_handler(TaskType.AGENT_EXECUTE.value)
-def handle_agent_execute(task_id: str, input_data: dict[str, Any]):
+def handle_agent_execute(task_id: str, input_data: dict[str, Any], check_cancelled=None):
     from manus.agents import AgentTeam
 
     async def run():
         agent = AgentTeam()
 
         async def progress_callback(progress: float, message: str):
+            if check_cancelled and check_cancelled():
+                raise asyncio.CancelledError("Task cancelled")
             await broadcast_progress(task_id, progress, message)
 
         result = await agent.execute(
@@ -175,19 +178,33 @@ def handle_file_task(task_id: str, input_data: dict[str, Any]):
 def process_task(task_id: str, task_type: str, input_data: dict[str, Any]) -> dict[str, Any]:
     db = get_database()
     repository = TaskRepository(db)
+    queue_manager = get_queue_manager()
 
     task = repository.get_by_id(task_id)
     if not task:
         return {"error": f"Task {task_id} not found"}
 
+    if not queue_manager.check_dependencies_met(task_id):
+        repository.update_status(task_id, TaskStatus.PENDING)
+        asyncio.run(broadcast_status(task_id, "waiting_for_dependencies"))
+        if not queue_manager.wait_for_dependencies(task_id, timeout=300):
+            return {"error": "Dependencies timeout"}
+
     repository.update_status(task_id, TaskStatus.RUNNING)
     asyncio.run(broadcast_status(task_id, "running"))
 
+    def check_cancelled():
+        task = repository.get_by_id(task_id)
+        return task and task.status == TaskStatus.CANCELLED.value
+
     try:
         if task_type in TASK_HANDLERS:
-            result = TASK_HANDLERS[task_type](task_id, input_data)
+            result = TASK_HANDLERS[task_type](task_id, input_data, check_cancelled)
         else:
             result = _default_handler(task_id, task_type, input_data)
+
+        if check_cancelled():
+            return {"cancelled": True}
 
         repository.update_status(task_id, TaskStatus.COMPLETED)
         repository.update_result(task_id, result, None)
@@ -196,6 +213,11 @@ def process_task(task_id: str, task_type: str, input_data: dict[str, Any]) -> di
         repository.add_event(task_id, "completed", {"result": result})
 
         return result
+
+    except asyncio.CancelledError:
+        repository.update_status(task_id, TaskStatus.CANCELLED)
+        repository.add_event(task_id, "cancelled", {"reason": "Task was cancelled"})
+        return {"cancelled": True}
 
     except Exception as e:
         error_msg = str(e)

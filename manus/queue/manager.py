@@ -78,6 +78,16 @@ class TaskQueueManager:
         if task.status in (TaskStatus.COMPLETED.value, TaskStatus.FAILED.value, TaskStatus.CANCELLED.value):
             return False
 
+        if self.queue:
+            from rq.job import Job
+            jobs = self.queue.get_job_ids()
+            for job_id in jobs:
+                if task_id in str(job_id):
+                    job = self.queue.fetch_job(job_id)
+                    if job:
+                        job.cancel()
+                    break
+
         task.status = TaskStatus.CANCELLED.value
         self.repository.update(task)
         self.repository.add_event(task.id, "cancelled", {})
@@ -88,6 +98,50 @@ class TaskQueueManager:
 
     def get_task_events(self, task_id: str) -> list:
         return self.repository.get_events(task_id)
+
+    def add_dependency(self, task_id: str, depends_on_task_id: str) -> bool:
+        from manus.db.models import TaskDependency
+        if task_id == depends_on_task_id:
+            return False
+        dep = TaskDependency(
+            task_id=task_id,
+            depends_on_task_id=depends_on_task_id,
+            status="pending",
+        )
+        with self.db.get_session() as session:
+            session.add(dep)
+            session.commit()
+        return True
+
+    def get_dependencies(self, task_id: str) -> list[str]:
+        from manus.db.models import TaskDependency
+        with self.db.get_session() as session:
+            deps = session.query(TaskDependency).filter(
+                TaskDependency.task_id == task_id
+            ).all()
+            return [d.depends_on_task_id for d in deps]
+
+    def check_dependencies_met(self, task_id: str) -> bool:
+        from manus.db.models import TaskDependency
+        with self.db.get_session() as session:
+            deps = session.query(TaskDependency).filter(
+                TaskDependency.task_id == task_id,
+                TaskDependency.status != "completed",
+            ).all()
+            for dep in deps:
+                parent = session.query(Task).filter(Task.id == dep.depends_on_task_id).first()
+                if not parent or parent.status != TaskStatus.COMPLETED.value:
+                    return False
+            return True
+
+    def wait_for_dependencies(self, task_id: str, timeout: int = 300) -> bool:
+        import time
+        start = time.time()
+        while time.time() - start < timeout:
+            if self.check_dependencies_met(task_id):
+                return True
+            time.sleep(1)
+        return False
 
 
 _manager: TaskQueueManager | None = None
