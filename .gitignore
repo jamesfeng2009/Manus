@@ -27,6 +27,12 @@ venv/
 ENV/
 env/
 
+# Environment
+.env
+.env.local
+*.db
+*.sqlite
+
 # IDE
 .idea/
 .vscode/

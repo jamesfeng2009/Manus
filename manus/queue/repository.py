@@ -1,5 +1,4 @@
-from manus.queue.database import Database
-from manus.queue.models import Task, TaskEvent, TaskStatus
+from manus.db import Database, Task, TaskEvent, TaskStatus
 from datetime import datetime
 from typing import Any
 

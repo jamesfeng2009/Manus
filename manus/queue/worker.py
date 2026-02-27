@@ -3,9 +3,8 @@ import asyncio
 from typing import Any
 from datetime import datetime
 
-from manus.queue.database import get_database
+from manus.db import get_database, TaskStatus, TaskType
 from manus.queue.repository import TaskRepository
-from manus.queue.models import TaskStatus, TaskType
 from manus.queue.websocket import broadcast_progress, broadcast_status, broadcast_result, broadcast_error
 
 

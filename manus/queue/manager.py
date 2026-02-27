@@ -1,8 +1,7 @@
 import uuid
 import os
 from typing import Any
-from manus.queue.models import Task, TaskStatus, TaskType
-from manus.queue.database import get_database, Database
+from manus.db import Task, TaskStatus, TaskType, get_database, Database
 from manus.queue.repository import TaskRepository
 from manus.queue.websocket import get_ws_manager, TaskEvent
 

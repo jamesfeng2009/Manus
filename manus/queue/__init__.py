@@ -1,5 +1,4 @@
-from manus.queue.models import Task, TaskStatus, TaskType
-from manus.queue.database import Database, get_database, init_database
+from manus.db import Task, TaskStatus, TaskType, Database, get_database, init_database
 from manus.queue.repository import TaskRepository
 from manus.queue.manager import TaskQueueManager, get_queue_manager
 from manus.queue.websocket import WSManager, get_ws_manager, broadcast_progress, broadcast_status, broadcast_result, broadcast_error

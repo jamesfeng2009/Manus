@@ -5,9 +5,12 @@ from contextlib import contextmanager
 from typing import Generator
 import os
 
+from manus.config import load_env_file
+
 
 class Database:
     def __init__(self, database_url: str | None = None):
+        load_env_file()
         url = database_url or os.getenv(
             "DATABASE_URL",
             "sqlite:///./manus.db"
@@ -27,7 +30,7 @@ class Database:
         )
 
     def create_tables(self):
-        from manus.queue.models import Base
+        from manus.db.models import Base
         Base.metadata.create_all(bind=self.engine)
 
     @contextmanager
