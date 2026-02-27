@@ -15,6 +15,7 @@ from manus.tasks import TaskManager, TaskStatus, get_task_manager
 from manus.websocket.handler import SSEController, WebSocketController, DiscordWebSocketController
 from manus.auth.routes import AuthController, APIKeyController
 from manus.auth.oauth import OAuthController
+from manus.api.usage import UsageController, RecordController
 
 
 class TaskCreate(BaseModel):
@@ -327,5 +328,7 @@ app = Litestar(
         AuthController,
         APIKeyController,
         OAuthController,
+        UsageController,
+        RecordController,
     ],
 )

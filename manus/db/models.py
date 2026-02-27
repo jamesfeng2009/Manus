@@ -123,3 +123,47 @@ class TaskDependency(Base):
         Index("idx_task_deps_task_id", "task_id"),
         Index("idx_task_deps_depends_on", "depends_on_task_id"),
     )
+
+
+class APIUsage(Base):
+    __tablename__ = "api_usage"
+
+    id = Column(String(64), primary_key=True)
+    user_id = Column(String(64), ForeignKey("users.id", ondelete="SET NULL"))
+    provider = Column(String(32), nullable=False)
+    model = Column(String(64), nullable=False)
+    prompt_tokens = Column(Integer, default=0)
+    completion_tokens = Column(Integer, default=0)
+    total_tokens = Column(Integer, default=0)
+    latency_ms = Column(Integer)
+    status_code = Column(Integer)
+    endpoint = Column(String(128))
+    error = Column(Text, nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
+
+    __table_args__ = (
+        Index("idx_api_usage_user_id", "user_id"),
+        Index("idx_api_usage_created_at", "created_at"),
+        Index("idx_api_usage_provider_model", "provider", "model"),
+    )
+
+
+class TaskUsage(Base):
+    __tablename__ = "task_usage"
+
+    id = Column(String(64), primary_key=True)
+    user_id = Column(String(64), ForeignKey("users.id", ondelete="SET NULL"))
+    task_id = Column(String(64), nullable=True)
+    tool_name = Column(String(64), nullable=False)
+    duration_ms = Column(Integer)
+    status = Column(String(32))
+    input_size = Column(Integer, default=0)
+    output_size = Column(Integer, default=0)
+    created_at = Column(DateTime, nullable=False, default=datetime.now)
+
+    __table_args__ = (
+        Index("idx_task_usage_user_id", "user_id"),
+        Index("idx_task_usage_task_id", "task_id"),
+        Index("idx_task_usage_tool_name", "tool_name"),
+        Index("idx_task_usage_created_at", "created_at"),
+    )

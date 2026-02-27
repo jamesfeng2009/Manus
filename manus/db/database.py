@@ -60,3 +60,9 @@ def init_database(database_url: str | None = None) -> Database:
     db = get_database(database_url)
     db.create_tables()
     return db
+
+
+def get_db() -> Generator[Session, None, None]:
+    db = get_database()
+    with db.get_session() as session:
+        yield session
