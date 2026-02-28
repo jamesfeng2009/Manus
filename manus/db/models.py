@@ -34,7 +34,7 @@ class Task(Base):
     __tablename__ = "tasks"
 
     id = Column(String(64), primary_key=True, default=lambda: f"task_{uuid.uuid4().hex[:12]}")
-    user_id = Column(String(64), nullable=False, index=True)
+    user_id = Column(String(64), ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
     task_type = Column(String(64), nullable=False)
     status = Column(String(32), nullable=False, default=TaskStatus.PENDING.value)
     progress = Column(Float, nullable=False, default=0.0)
@@ -48,6 +48,7 @@ class Task(Base):
     updated_at = Column(DateTime, nullable=False, default=datetime.now, onupdate=datetime.now)
 
     events = relationship("TaskEvent", back_populates="task", cascade="all, delete-orphan")
+    user = relationship("User", back_populates="tasks")
 
     __table_args__ = (
         Index("idx_tasks_status", "status"),
@@ -166,4 +167,118 @@ class TaskUsage(Base):
         Index("idx_task_usage_task_id", "task_id"),
         Index("idx_task_usage_tool_name", "tool_name"),
         Index("idx_task_usage_created_at", "created_at"),
+    )
+
+
+class PlanExecutionStatus(str, Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    PARTIAL = "partial"
+
+
+class StepExecutionStatus(str, Enum):
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    SKIPPED = "skipped"
+    RETRYING = "retrying"
+
+
+class ExecuteMode(str, Enum):
+    SEQUENTIAL = "sequential"
+    PARALLEL = "parallel"
+    ADAPTIVE = "adaptive"
+
+
+class PlanExecution(Base):
+    __tablename__ = "plan_executions"
+
+    id = Column(String(64), primary_key=True, default=lambda: f"plan_{uuid.uuid4().hex[:12]}")
+    task_id = Column(String(64), index=True)
+    user_id = Column(String(64), nullable=False, index=True)
+
+    original_input = Column(Text, nullable=False)
+    plan_json = Column(JSON)
+
+    mode = Column(String(32), default=ExecuteMode.SEQUENTIAL.value)
+    max_iterations = Column(Integer, default=3)
+    enable_verification = Column(Boolean, default=True)
+    verify_each_step = Column(Boolean, default=False)
+
+    status = Column(String(32), nullable=False, default=PlanExecutionStatus.PENDING.value)
+    current_iteration = Column(Integer, default=0)
+    progress = Column(Float, default=0.0)
+
+    final_result = Column(Text)
+    error = Column(Text)
+
+    created_at = Column(DateTime, default=datetime.now)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now)
+    completed_at = Column(DateTime)
+
+    __table_args__ = (
+        Index("idx_plan_executions_status", "status"),
+        Index("idx_plan_executions_user_id", "user_id"),
+        Index("idx_plan_executions_created_at", "created_at"),
+    )
+
+
+class StepExecution(Base):
+    __tablename__ = "step_executions"
+
+    id = Column(String(64), primary_key=True, default=lambda: f"step_{uuid.uuid4().hex[:12]}")
+    plan_id = Column(String(64), ForeignKey("plan_executions.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    step_index = Column(Integer, nullable=False)
+    step_id = Column(String(64))
+    description = Column(Text, nullable=False)
+    tool_name = Column(String(64))
+    complexity = Column(String(32))
+    dependencies = Column(JSON)
+
+    status = Column(String(32), nullable=False, default=StepExecutionStatus.PENDING.value)
+    retry_count = Column(Integer, default=0)
+
+    input_prompt = Column(Text)
+    context = Column(JSON)
+
+    result = Column(Text)
+    error = Column(Text)
+    tool_calls_json = Column(JSON)
+
+    started_at = Column(DateTime)
+    completed_at = Column(DateTime)
+    duration_ms = Column(Integer)
+
+    __table_args__ = (
+        Index("idx_step_executions_plan_id", "plan_id"),
+        Index("idx_step_executions_status", "status"),
+    )
+
+
+class VerificationRecord(Base):
+    __tablename__ = "verification_records"
+
+    id = Column(String(64), primary_key=True, default=lambda: f"verify_{uuid.uuid4().hex[:12]}")
+    plan_id = Column(String(64), ForeignKey("plan_executions.id", ondelete="CASCADE"), nullable=False, index=True)
+    step_id = Column(String(64), ForeignKey("step_executions.id", ondelete="CASCADE"))
+
+    iteration = Column(Integer)
+    verification_type = Column(String(32))
+
+    verified = Column(Boolean, default=False)
+    issues = Column(JSON)
+    suggestions = Column(JSON)
+    verification_prompt = Column(Text)
+    verification_result = Column(Text)
+
+    created_at = Column(DateTime, default=datetime.now)
+    duration_ms = Column(Integer)
+
+    __table_args__ = (
+        Index("idx_verification_records_plan_id", "plan_id"),
     )

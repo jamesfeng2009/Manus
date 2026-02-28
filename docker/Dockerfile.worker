@@ -1,0 +1,16 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    curl \
+    git \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY . /app
+
+RUN pip install --no-cache-dir -e .
+
+ENV PYTHONUNBUFFERED=1
+
+CMD ["python", "-m", "manus.agents.plan_execute.worker"]
