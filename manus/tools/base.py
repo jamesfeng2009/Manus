@@ -21,7 +21,7 @@ class ToolStatus(Enum):
 class ToolResult:
     """Result of tool execution."""
     tool_name: str = ""
-    status: ToolStatus
+    status: ToolStatus = ToolStatus.SUCCESS
     content: str = ""
     error: str | None = None
     metadata: dict[str, Any] = field(default_factory=dict)

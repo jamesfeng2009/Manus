@@ -10,6 +10,7 @@ from manus.agents.executor import ReActExecutor, get_executor, TaskCancelledErro
 from manus.agents.reflector_executor import ReflectorRetryExecutor, get_reflector_executor, RetryConfig, RetryRecord
 from manus.agents.error_tracker import ErrorTracker, ErrorCategory, ErrorSeverity, ErrorRecord, ErrorPattern, ErrorStats, get_error_tracker
 from manus.agents.learning_engine import LearningEngine, TaskComplexity, StrategyType, TaskExample, StrategyPerformance, LearningInsight, ExecutionStrategy, get_learning_engine
+from manus.agents.learning_agent import LearningAgent
 from manus.agents.callbacks import (
     ExecutorCallbacks,
     ExecutionState,
@@ -63,6 +64,7 @@ __all__ = [
     "LearningInsight",
     "ExecutionStrategy",
     "get_learning_engine",
+    "LearningAgent",
     "ExecutorCallbacks",
     "ExecutionState",
     "ExecutionResult",
