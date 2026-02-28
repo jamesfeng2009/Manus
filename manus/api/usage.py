@@ -26,6 +26,7 @@ class UsageController(Controller):
 
     @get()
     async def get_usage(
+        self,
         user_id: str | None = Parameter(default=None),
         days: int = Parameter(default=30),
     ) -> dict[str, Any]:
@@ -41,6 +42,7 @@ class UsageController(Controller):
 
     @get("/trend")
     async def get_usage_trend(
+        self,
         user_id: str | None = Parameter(default=None),
         days: int = Parameter(default=30),
     ) -> list[dict[str, Any]]:
@@ -50,6 +52,7 @@ class UsageController(Controller):
 
     @get("/top-users")
     async def get_top_users(
+        self,
         days: int = Parameter(default=30),
         limit: int = Parameter(default=10),
     ) -> list[dict[str, Any]]:
@@ -59,6 +62,7 @@ class UsageController(Controller):
 
     @get("/tasks")
     async def get_task_usage(
+        self,
         user_id: str | None = Parameter(default=None),
         days: int = Parameter(default=30),
     ) -> dict[str, Any]:
@@ -74,6 +78,7 @@ class RecordController(Controller):
 
     @post("/api-call")
     async def record_api_call(
+        self,
         provider: str,
         model: str,
         prompt_tokens: int = 0,
@@ -101,6 +106,7 @@ class RecordController(Controller):
 
     @post("/task-execution")
     async def record_task_execution(
+        self,
         tool_name: str,
         duration_ms: int = 0,
         status: str = "success",

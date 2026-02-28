@@ -14,12 +14,13 @@ class ToolStatus(Enum):
     SUCCESS = "success"
     FAILED = "failed"
     TIMEOUT = "timeout"
+    ERROR = "error"
 
 
 @dataclass
 class ToolResult:
     """Result of tool execution."""
-    tool_name: str
+    tool_name: str = ""
     status: ToolStatus
     content: str = ""
     error: str | None = None

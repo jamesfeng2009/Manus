@@ -97,7 +97,7 @@ class TaskState:
             st for st in self.subtasks
             if st.status == SubTaskStatus.PENDING
             and all(
-                dep_id in [s.id for s in self.completed_subtasks]
+                dep_id in [s.id for s in self.get_completed_subtasks()]
                 for dep_id in st.dependencies
             )
         ]
@@ -126,11 +126,12 @@ class TaskState:
         return any(st.status == SubTaskStatus.FAILED for st in self.subtasks)
 
     def can_continue(self) -> bool:
-        return (
-            self.current_iteration < self.max_iterations
-            and not self.has_failures()
-            and not self.is_complete()
-        )
+        if self.current_iteration >= self.max_iterations:
+            return False
+        if self.is_complete():
+            return False
+        self.current_iteration += 1
+        return True
 
     def get_progress(self) -> float:
         if not self.subtasks:

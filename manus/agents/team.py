@@ -114,7 +114,7 @@ class AgentTeam:
     ) -> TeamResult:
         """Execute task using the agent team."""
         start_time = datetime.now()
-        result = TeamResult(task_id=task_id, status=TaskStatus.RUNNING)
+        result = TeamResult(task_id=task_id, status=TaskStatus.EXECUTING)
 
         try:
             plan = await self.planner.plan(task_id=task_id, user_input=user_input)
@@ -233,8 +233,8 @@ class SimpleAgentTeam(AgentTeam):
 
     def __init__(self):
         super().__init__(
-            planner_model="gpt-4o",
-            executor_model="gpt-4o",
-            verifier_model="gpt-4o",
+            planner_model="openai/gpt-4o",
+            executor_model="openai/gpt-4o",
+            verifier_model="openai/gpt-4o",
             max_iterations=3,
         )

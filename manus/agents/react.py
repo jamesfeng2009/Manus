@@ -120,7 +120,7 @@ Action: [tool_name] [parameters]
 
         result = {
             "task_id": task_id,
-            "status": TaskStatus.RUNNING.value,
+            "status": TaskStatus.EXECUTING.value,
             "steps": [],
             "final_response": "",
         }
@@ -134,14 +134,13 @@ Action: [tool_name] [parameters]
                     temperature=0.7,
                     max_tokens=2048,
                 )
+                content = response.get("content", "")
+                tool_calls = response.get("tool_calls", [])
                 self._emit_thinking(content)
             except Exception as e:
                 result["status"] = TaskStatus.FAILED.value
                 result["error"] = str(e)
                 break
-
-            content = response.get("content", "")
-            tool_calls = response.get("tool_calls", [])
 
             if not tool_calls and content:
                 result["final_response"] = content

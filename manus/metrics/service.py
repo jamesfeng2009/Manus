@@ -25,12 +25,20 @@ class UsageService:
 
     def get_user_usage(
         self,
-        user_id: str,
+        user_id: str | None = None,
         start_date: datetime | None = None,
         end_date: datetime | None = None,
+        days: int | None = None,
     ) -> dict[str, Any]:
         """Get usage statistics for a user."""
-        query = self.db.query(APIUsage).filter(APIUsage.user_id == user_id)
+        if days is not None:
+            end_date = datetime.now()
+            start_date = end_date - timedelta(days=days)
+
+        query = self.db.query(APIUsage)
+
+        if user_id:
+            query = query.filter(APIUsage.user_id == user_id)
 
         if start_date:
             query = query.filter(APIUsage.created_at >= start_date)

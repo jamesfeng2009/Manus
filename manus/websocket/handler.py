@@ -67,7 +67,7 @@ class DiscordWebSocketController(Controller):
         payload = data.get("d", {})
 
         if op == 2:
-            await self._handle_identify(socket, payload, state, bot_token)
+            await self._handle_identify(socket, payload, state, bot_token, ws_manager, conn_id)
         elif op == 6:
             await self._handle_heartbeat(socket, state)
         elif op == 1:
@@ -79,6 +79,8 @@ class DiscordWebSocketController(Controller):
         payload: dict,
         state: DiscordState,
         bot_token: str | None,
+        ws_manager,
+        conn_id: str,
     ):
         await socket.send_json({
             "op": 10,

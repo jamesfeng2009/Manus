@@ -26,7 +26,7 @@ class PlanExecuteConfig:
     executor_model: str = "gpt-4o-mini"
     verifier_model: str = "claude-3-5-sonnet-20241022"
     
-    mode: str = ExecuteMode.SEQUENTIAL.value
+    mode: ExecuteMode = ExecuteMode.SEQUENTIAL
     max_iterations: int = 3
     max_steps_per_phase: int = 50
     timeout: int = 1800
@@ -41,9 +41,6 @@ class PlanExecuteConfig:
     max_concurrent_steps: int = 5
     
     enable_db_record: bool = True
-    
-    def __post_init__(self):
-        self.mode = ExecuteMode(self.mode)
 
 
 @dataclass

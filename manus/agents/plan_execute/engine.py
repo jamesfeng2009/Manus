@@ -247,11 +247,11 @@ class PlanExecuteEngine:
         plan_db,
     ):
         """Execution phase - execute plan steps."""
-        if self.config.mode == ExecuteMode.SEQUENTIAL.value:
+        if self.config.mode == ExecuteMode.SEQUENTIAL:
             await self._execute_sequential(task_id, original_input, plan, result, context, plan_db)
-        elif self.config.mode == ExecuteMode.PARALLEL.value:
+        elif self.config.mode == ExecuteMode.PARALLEL:
             await self._execute_parallel(task_id, original_input, plan, result, context, plan_db)
-        elif self.config.mode == ExecuteMode.ADAPTIVE.value:
+        elif self.config.mode == ExecuteMode.ADAPTIVE:
             await self._execute_adaptive(task_id, original_input, plan, result, context, plan_db)
     
     async def _execute_sequential(

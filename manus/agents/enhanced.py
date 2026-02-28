@@ -39,7 +39,7 @@ class EnhancedAgent:
 
     async def _plan(self, goal: str, context: dict[str, Any] | None = None) -> list[SubTask]:
         """简单任务分解"""
-        adapter = get_adapter(self.model_provider, self.model_name)
+        adapter = get_adapter(f"{self.model_provider}/{self.model_name}")
         
         prompt = PLANNER_PROMPT.format(goal=goal)
         
@@ -212,7 +212,7 @@ class EnhancedAgent:
             subtask.status = SubTaskStatus.FAILED
 
             if self.enable_reflection:
-                retry_decision = await self.reflector.simple_retry_decision(
+                retry_decision = self.reflector.simple_retry_decision(
                     subtask=subtask,
                     error=str(e),
                     attempts=subtask.attempts,
@@ -262,16 +262,16 @@ class EnhancedAgent:
         available_tools = self.tool_registry.list_tools()
 
         if not available_tools:
-            return {"error": "No tools available"}
+            return {"error": "No tools available", "status": "failed"}
 
         tool = self.tool_registry.get(available_tools[0])
         if not tool:
-            return {"error": f"Tool {available_tools[0]} not found"}
+            return {"error": f"Tool {available_tools[0]} not found", "status": "failed"}
 
-        result = await tool.execute(
-            task=subtask.description,
-            context={"subtask_id": subtask.id},
-        )
+        try:
+            result = await tool.execute_with_timing()
+        except TypeError:
+            result = await tool.execute_with_timing(task=subtask.description)
 
         return result.to_dict() if hasattr(result, "to_dict") else result
 

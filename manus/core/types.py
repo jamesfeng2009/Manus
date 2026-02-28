@@ -14,6 +14,7 @@ class TaskStatus(str, Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
+    PARTIAL = "partial"
 
 
 class AgentType(str, Enum):

@@ -91,7 +91,7 @@ class Reflector:
         context: dict[str, Any] | None = None,
     ) -> ReflectionResult:
         """反思执行结果"""
-        adapter = get_adapter(self.model_provider, self.model_name)
+        adapter = get_adapter(f"{self.model_provider}/{self.model_name}")
 
         result_str = self._format_result(result)
         context_str = json.dumps(context, ensure_ascii=False) if context else "None"
@@ -124,7 +124,7 @@ Analyze and provide your reflection."""
         attempts: int,
     ) -> RetryDecision:
         """判断是否重试"""
-        adapter = get_adapter(self.model_provider, self.model_name)
+        adapter = get_adapter(f"{self.model_provider}/{self.model_name}")
 
         prompt = RETRY_DECISION_PROMPT.format(
             subtask_description=subtask.description,

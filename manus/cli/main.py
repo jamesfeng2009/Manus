@@ -12,6 +12,7 @@ from manus.agents import SimpleAgentTeam
 from manus.config import get_config
 from manus.models import get_model_factory
 from manus.tasks import get_task_manager
+from manus.tasks.manager import TaskStatus
 
 
 @app.command()
@@ -91,8 +92,8 @@ def tasks(
     if list_all:
         all_tasks = tm.list_tasks(limit=100)
     else:
-        pending = tm.list_tasks(status="pending", limit=10)
-        running = tm.list_tasks(status="running", limit=10)
+        pending = tm.list_tasks(status=TaskStatus.PENDING, limit=10)
+        running = tm.list_tasks(status=TaskStatus.RUNNING, limit=10)
         all_tasks = pending + running
 
     if status_filter:
